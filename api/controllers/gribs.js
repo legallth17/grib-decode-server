@@ -26,6 +26,7 @@ var util = require('util');
  */
 module.exports = {
   get_gribs: get_gribs,
+  get_grib: get_grib,  
   create_grib: create_grib
 };
 
@@ -37,13 +38,20 @@ function get_gribs(req, res) {
   res.json([]);
 }
 
+function get_grib(req, res) {
+  var id = req.swagger.params.id.value;
+  res.json(grib_files[id]);
+}
+
 function create_grib(req, res) {
   var body = req.swagger.params.body.value;
-  res.status(201).json({
-    id: (next_grib_id++).toString(),
+  var id = (next_grib_id++).toString();
+  var grib_file = {
+    id: id,
     name: body.name,
     download_url: body.download_url,
     status: 'READY_FOR_DOWNLOAD'
-  });
-
+  };
+  grib_files[id]=grib_file;
+  res.status(201).set('Location','/gribs/'+id).json(grib_file);
 }

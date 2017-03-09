@@ -120,8 +120,69 @@ describe('controllers', function() {
             done();
           });
       });
+
+      it('should provide a Location header', function(done) {
+
+        request(server)
+          .post('/gribs')
+          .send({ name: 'aGribFileName', download_url : 'http://xxx'})
+          .set('Accept', 'application/json')
+          .expect(201)
+          .expect('Location',/^\/gribs\/\w*$/) // Location /gribs/id
+          .end(function(err, res) {
+            should.not.exist(err);
+            res.body.status.should.eql('READY_FOR_DOWNLOAD');
+            done();
+          });
+      });
+
+
     });
 
   });
+
+  describe('get_grib', function() {
+
+    describe('GET /gribs/{id}', function() {
+
+      it('retrieve resource created with POST', function(done) {
+
+        var grib_location;
+
+        var post_request = function(callback) {
+          request(server)
+            .post('/gribs')
+            .send({ name: 'aGribFileName', download_url : 'http://xxx'})
+            .set('Accept', 'application/json')
+            .expect(201)
+            .expect('Location',/gribs/) // Location /gribs/id
+            .end(function(err, res) {
+              if(err) callback(err);
+              grib_location = res.headers['location']
+              callback(null,res.body);
+            });
+        };
+        var get_request = function(callback) {
+          request(server)
+            .get(grib_location)
+            .set('Accept', 'application/json')
+            .expect(200)
+            .expect('Content-Type', /json/)
+            .end(function(err, res) {
+              if(err) callback(err);
+              callback(null,res.body);
+            });
+        };
+        async.series([post_request,get_request],
+          function(err,results) {
+            should.not.exist(err)
+            results[0].should.eql(results[1]);
+            done();
+          })
+      });
+
+    })
+
+  })
 
 });

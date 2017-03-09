@@ -68,6 +68,30 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /gribs/{id}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: gribs
+    get:
+      description: Return a grib file
+      # used as the method name of the controller
+      operationId: get_grib
+      parameters:
+        - name: id
+          in: path
+          description: id of the grib file
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/GribFile"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /swagger:
     x-swagger-pipe: swagger_raw
