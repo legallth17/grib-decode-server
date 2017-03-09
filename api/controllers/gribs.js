@@ -35,12 +35,12 @@ var next_grib_id = 1;
 
 function get_gribs(req, res) {
   var name = req.swagger.params.name.value;
-  res.json([]);
+  res.json(grib_files);
 }
 
 function get_grib(req, res) {
   var id = req.swagger.params.id.value;
-  var grib_file = grib_files[id];
+  var grib_file = grib_files[id-1];
   if(grib_file) {
     res.json(grib_file);
   } else {
@@ -57,6 +57,6 @@ function create_grib(req, res) {
     download_url: body.download_url,
     status: 'READY_FOR_DOWNLOAD'
   };
-  grib_files[id]=grib_file;
+  grib_files[id-1]=grib_file;
   res.status(201).set('Location','/gribs/'+id).json(grib_file);
 }
