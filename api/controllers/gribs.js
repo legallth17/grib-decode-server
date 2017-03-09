@@ -40,7 +40,12 @@ function get_gribs(req, res) {
 
 function get_grib(req, res) {
   var id = req.swagger.params.id.value;
-  res.json(grib_files[id]);
+  var grib_file = grib_files[id];
+  if(grib_file) {
+    res.json(grib_file);
+  } else {
+    res.status(404).end();
+  } 
 }
 
 function create_grib(req, res) {

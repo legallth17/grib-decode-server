@@ -145,7 +145,18 @@ describe('controllers', function() {
 
     describe('GET /gribs/{id}', function() {
 
-      it('retrieve resource created with POST', function(done) {
+      it('should return 404 when resource does not exist', function(done) {
+          request(server)
+            .get('/gribs/invalid_id')
+            .set('Accept', 'application/json')
+            .expect(404)
+            .end(function(err, res) {
+              should.not.exist(err);
+              done();
+            });
+      });
+
+      it('should retrieve resource using Location returned by POST request', function(done) {
 
         var grib_location;
 
