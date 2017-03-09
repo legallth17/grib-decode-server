@@ -44,7 +44,7 @@ function get_grib(req, res) {
   if(grib_file) {
     res.json(grib_file);
   } else {
-    res.status(404).end();
+    res.status(404).json({message:"grib file not found"});
   } 
 }
 

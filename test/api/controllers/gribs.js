@@ -150,8 +150,10 @@ describe('controllers', function() {
             .get('/gribs/invalid_id')
             .set('Accept', 'application/json')
             .expect(404)
+            .expect('Content-Type', /json/)
             .end(function(err, res) {
               should.not.exist(err);
+              res.body.message.should.match(/not found/);
               done();
             });
       });
