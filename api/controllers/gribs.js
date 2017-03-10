@@ -28,14 +28,42 @@ module.exports = {
   get_gribs: get_gribs,
   get_grib: get_grib,  
   create_grib: create_grib,
+  // test helpers
+  test_reset_data: test_reset_data,
+  test_set_data: test_set_data,
+  test_get_data: test_get_data
 };
 
 var grib_files = [];
 var next_grib_id = 1;
 
+// test helpers
+
+function test_reset_data() {
+  grib_files = [];
+  next_grib_id = 1;
+}
+
+function test_set_data(data) {
+  grib_files = data;
+  next_grib_id = data.length+1;
+}
+
+function test_get_data() {
+  return grib_files;
+}
+
+// controller operations
+
 function get_gribs(req, res) {
   var name = req.swagger.params.name.value;
-  res.json(grib_files);
+  if(name) {
+    res.json(grib_files.filter(function(item) {
+      return item.name === name;
+    }));
+  } else {
+    res.json(grib_files);
+  }
 }
 
 function get_grib(req, res) {

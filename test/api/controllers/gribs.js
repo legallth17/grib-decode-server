@@ -10,7 +10,9 @@ describe('controllers', function() {
 
     describe('GET /gribs', function() {
 
-      it('should return empty array', function(done) {
+      it('should return empty array when no data are available', function(done) {
+
+        gribs_controller.test_reset_data();
 
         request(server)
           .get('/gribs')
@@ -26,63 +28,50 @@ describe('controllers', function() {
           });
       });
 
-      it('should accept a name parameter', function(done) {
+      it('should return data when available', function(done) {
+
+        var test_data = [
+          { id:'1', name:'file1', download_url: 'http://myserver/file1', status:'READY_FOR_DOWNLOAD'},
+          { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
+          { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
+        ];
+        gribs_controller.test_set_data(test_data);
 
         request(server)
           .get('/gribs')
-          .query({ name: 'aName'})
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            should.not.exist(err);
+            res.body.should.eql(test_data);
+            done();
+          });
+      });
+
+      it('should return items that only match name parameter when provided', function(done) {
+
+        var test_data = [
+          { id:'1', name:'file1', download_url: 'http://myserver/file1', status:'READY_FOR_DOWNLOAD'},
+          { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
+          { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
+        ];
+        gribs_controller.test_set_data(test_data);
+
+        request(server)
+          .get('/gribs')
+          .query({ name: 'file2'})
           .set('Accept', 'application/json')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
             should.not.exist(err);
 
-            res.body.should.eql([]);
+            res.body.should.containEql(test_data[1]);
 
             done();
           });
       });
-
-      it('should return the list of items that have been created', function(done) {
-
-        var post_grib = function(callback) {
-          request(server)
-            .post('/gribs')
-            .send({ name: 'aGribFileName', download_url : 'http://xxx'})
-            .set('Accept', 'application/json')
-            .expect(201)
-            .end(function(err, res) {
-              if(err) callback(err);
-              callback(null,res.body);
-            });
-        };
-        var get_gribs = function(callback) {
-          request(server)
-            .get('/gribs')
-            .set('Accept', 'application/json')
-            .expect(200)
-            .end(function(err, res) {
-              if(err) callback(err);
-              callback(null,res.body);
-            });
-        };
-
-        // use async to run 2 POST /grib requests and 1 GET / Gribs
-        async.series([post_grib,post_grib,get_gribs],
-          // check results
-          function(err,results) {
-            console.log(results)
-            should.not.exist(err);
-            var grib1 = results[0];
-            var grib2 = results[1];
-            var gribs = results[2];
-            gribs.length.should.be.aboveOrEqual(2);
-            gribs.should.containEql(grib1);
-            gribs.should.containEql(grib2);
-            done();
-          });
-      });
-
 
     });
 
@@ -102,7 +91,6 @@ describe('controllers', function() {
           .expect(201)
           .end(function(err, res) {
             should.not.exist(err);
-            //res.body.should.eql([]);
             done();
           });
       });
@@ -196,6 +184,26 @@ describe('controllers', function() {
             .end(function(err, res) {
               should.not.exist(err);
               res.body.message.should.match(/not found/);
+              done();
+            });
+      });
+
+      it('should return resource when it exists', function(done) {
+        var test_data = [
+          { id:'1', name:'file1', download_url: 'http://myserver/file1', status:'READY_FOR_DOWNLOAD'},
+          { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
+          { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
+        ];
+        gribs_controller.test_set_data(test_data);
+
+          request(server)
+            .get('/gribs/2')
+            .set('Accept', 'application/json')
+            .expect(200)
+            .expect('Content-Type', /json/)
+            .end(function(err, res) {
+              should.not.exist(err);
+              res.body.should.eql(test_data[1]);
               done();
             });
       });
