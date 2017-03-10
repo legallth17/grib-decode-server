@@ -27,7 +27,7 @@ var util = require('util');
 module.exports = {
   get_gribs: get_gribs,
   get_grib: get_grib,  
-  create_grib: create_grib
+  create_grib: create_grib,
 };
 
 var grib_files = [];

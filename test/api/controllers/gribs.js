@@ -2,6 +2,7 @@ var should = require('should');
 var request = require('supertest');
 var server = require('../../../app');
 var async = require('async');
+var gribs_controller = require('../../../api/controllers/gribs');
 
 describe('controllers', function() {
 
@@ -41,6 +42,47 @@ describe('controllers', function() {
             done();
           });
       });
+
+      it('should return the list of items that have been created', function(done) {
+
+        var post_grib = function(callback) {
+          request(server)
+            .post('/gribs')
+            .send({ name: 'aGribFileName', download_url : 'http://xxx'})
+            .set('Accept', 'application/json')
+            .expect(201)
+            .end(function(err, res) {
+              if(err) callback(err);
+              callback(null,res.body);
+            });
+        };
+        var get_gribs = function(callback) {
+          request(server)
+            .get('/gribs')
+            .set('Accept', 'application/json')
+            .expect(200)
+            .end(function(err, res) {
+              if(err) callback(err);
+              callback(null,res.body);
+            });
+        };
+
+        // use async to run 2 POST /grib requests and 1 GET / Gribs
+        async.series([post_grib,post_grib,get_gribs],
+          // check results
+          function(err,results) {
+            console.log(results)
+            should.not.exist(err);
+            var grib1 = results[0];
+            var grib2 = results[1];
+            var gribs = results[2];
+            gribs.length.should.be.aboveOrEqual(2);
+            gribs.should.containEql(grib1);
+            gribs.should.containEql(grib2);
+            done();
+          });
+      });
+
 
     });
 
