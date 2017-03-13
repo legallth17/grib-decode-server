@@ -1,10 +1,19 @@
 var should = require('should');
 var request = require('supertest');
+var sinon = require ('sinon');
 var server = require('../../../app');
 var async = require('async');
 var gribs_controller = require('../../../api/controllers/gribs');
+var downloader = require('../../../api/helpers/downloader')
 
 describe('controllers', function() {
+
+  beforeEach( function() {
+        sinon.spy(downloader,"start_download");
+  });
+  afterEach( function() {
+        sinon.restore(downloader,"start_download");
+  });
 
   describe('get_gribs', function() {
 
@@ -162,6 +171,20 @@ describe('controllers', function() {
           .end(function(err, res) {
             should.not.exist(err);
             res.body.status.should.eql('READY_FOR_DOWNLOAD');
+            done();
+          });
+      });
+
+      it('should start download', function(done) {
+        request(server)
+          .post('/gribs')
+          .send({ name: 'aGribFileName', download_url : 'http://xxx'})
+          .set('Accept', 'application/json')
+          .expect(201)
+          .end(function(err, res) {
+            should.not.exist(err);
+            var id = res.body.id;
+            sinon.assert.calledWith(downloader.start_download,id,'http://xxx');
             done();
           });
       });

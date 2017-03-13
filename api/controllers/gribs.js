@@ -11,6 +11,7 @@
   It is a good idea to list the modules that your application depends on in the package.json in the project root
  */
 var util = require('util');
+var downloader = require('../helpers/downloader');
 
 /*
  Once you 'require' a module you can reference the things that it exports.  These are defined in module.exports.
@@ -32,6 +33,7 @@ module.exports = {
   test_reset_data: test_reset_data,
   test_set_data: test_set_data,
   test_get_data: test_get_data
+
 };
 
 var grib_files = [];
@@ -86,5 +88,6 @@ function create_grib(req, res) {
     status: 'READY_FOR_DOWNLOAD'
   };
   grib_files[id-1]=grib_file;
+  downloader.start_download(grib_file.id,grib_file.download_url);
   res.status(201).set('Location','/gribs/'+id).json(grib_file);
 }
