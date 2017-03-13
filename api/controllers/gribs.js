@@ -12,6 +12,7 @@
  */
 var util = require('util');
 var downloader = require('../helpers/downloader');
+var store = require('../helpers/store');
 
 /*
  Once you 'require' a module you can reference the things that it exports.  These are defined in module.exports.
@@ -28,37 +29,14 @@ var downloader = require('../helpers/downloader');
 module.exports = {
   get_gribs: get_gribs,
   get_grib: get_grib,  
-  create_grib: create_grib,
-  // test helpers
-  test_reset_data: test_reset_data,
-  test_set_data: test_set_data,
-  test_get_data: test_get_data
-
+  create_grib: create_grib
 };
-
-var grib_files = [];
-var next_grib_id = 1;
-
-// test helpers
-
-function test_reset_data() {
-  grib_files = [];
-  next_grib_id = 1;
-}
-
-function test_set_data(data) {
-  grib_files = data;
-  next_grib_id = data.length+1;
-}
-
-function test_get_data() {
-  return grib_files;
-}
 
 // controller operations
 
 function get_gribs(req, res) {
   var name = req.swagger.params.name.value;
+  var grib_files = store.get_all();
   if(name) {
     res.json(grib_files.filter(function(item) {
       return item.name === name;
@@ -70,6 +48,7 @@ function get_gribs(req, res) {
 
 function get_grib(req, res) {
   var id = req.swagger.params.id.value;
+  var grib_files = store.get_all();
   var grib_file = grib_files[id-1];
   if(grib_file) {
     res.json(grib_file);
@@ -80,14 +59,12 @@ function get_grib(req, res) {
 
 function create_grib(req, res) {
   var body = req.swagger.params.body.value;
-  var id = (next_grib_id++).toString();
-  var grib_file = {
-    id: id,
+  // id is returned
+  var grib_file = store.add({
     name: body.name,
     download_url: body.download_url,
     status: 'READY_FOR_DOWNLOAD'
-  };
-  grib_files[id-1]=grib_file;
+  });
   downloader.start_download(grib_file.id,grib_file.download_url);
-  res.status(201).set('Location','/gribs/'+id).json(grib_file);
+  res.status(201).set('Location','/gribs/'+grib_file.id).json(grib_file);
 }

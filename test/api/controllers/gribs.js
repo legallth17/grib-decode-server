@@ -5,6 +5,7 @@ var server = require('../../../app');
 var async = require('async');
 var gribs_controller = require('../../../api/controllers/gribs');
 var downloader = require('../../../api/helpers/downloader')
+var store = require('../../../api/helpers/store')
 
 describe('controllers', function() {
 
@@ -19,9 +20,10 @@ describe('controllers', function() {
 
     describe('GET /gribs', function() {
 
+
       it('should return empty array when no data are available', function(done) {
 
-        gribs_controller.test_reset_data();
+        store.reset();
 
         request(server)
           .get('/gribs')
@@ -44,7 +46,7 @@ describe('controllers', function() {
           { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
           { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
         ];
-        gribs_controller.test_set_data(test_data);
+        store.set_items(test_data);
 
         request(server)
           .get('/gribs')
@@ -65,8 +67,9 @@ describe('controllers', function() {
           { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
           { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
         ];
-        gribs_controller.test_set_data(test_data);
+        store.set_items(test_data);
 
+//        console.log(store.get_all());
         request(server)
           .get('/gribs')
           .query({ name: 'file2'})
@@ -217,7 +220,7 @@ describe('controllers', function() {
           { id:'2', name:'file2', download_url: 'http://myserver/file2', status:'READY_FOR_DOWNLOAD'},
           { id:'3', name:'file3', download_url: 'http://myserver/file3', status:'READY_FOR_DOWNLOAD'}
         ];
-        gribs_controller.test_set_data(test_data);
+        store.set_items(test_data);
 
           request(server)
             .get('/gribs/2')
