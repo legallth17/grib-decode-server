@@ -10,7 +10,7 @@ var store = require('../../../api/helpers/store')
 describe('controllers', function() {
 
   beforeEach( function() {
-        sinon.spy(downloader,"start_download");
+        sinon.stub(downloader,"start_download");
   });
   afterEach( function() {
         sinon.restore(downloader,"start_download");

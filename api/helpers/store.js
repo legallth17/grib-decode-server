@@ -5,7 +5,8 @@ module.exports = {
   update: update,
   get_all: get_all,
   reset: reset,
-  set_items: set_items
+  set_items: set_items,
+  get: get
 };
 
 var items = [];
@@ -17,12 +18,16 @@ function add(item) {
   return item;
 }
 
-function get_all() {
-  return items;
+function get(id) {
+  return items[Number(id)-1];
 }
 
 function update(item) {
-  items[item.id] = item;
+  items[Number(item.id)-1] = item;
+}
+
+function get_all() {
+  return items;
 }
 
 function reset() {
