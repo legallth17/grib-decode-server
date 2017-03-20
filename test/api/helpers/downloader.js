@@ -2,6 +2,9 @@ var should = require('should');
 var sinon = require ('sinon');
 var downloader = require('../../../api/helpers/downloader');
 var store = require('../../../api/helpers/store');
+var os = require('os');
+var http = require('http');
+var fs = require('fs');
 
 describe('helpers', function() {
 
@@ -46,8 +49,33 @@ describe('helpers', function() {
 
     describe('download', function() {
 
-      it('should donwload');
-      it('should call a callback the file is downloaded');
+      var test_file;
+      var server;
+
+      beforeEach(function() {
+        // Generate name of temporary test file
+        test_file = os.tmpdir() + "/grib"+Date.now()+".test";
+        // Start a simple http server that 
+        server = http.createServer(function(req,res) {
+          res.end("grib data");
+        });
+        server.listen(10200);
+      });
+
+      afterEach(function() {
+        // Delete temporary test file
+        fs.unlinkSync(test_file);
+        // Stop test server
+        server.close();
+      });
+
+      it('should donwload the file and call the callback', function(done) {
+          downloader.download("http://localhost:10200",test_file, function() {
+            var file_content = fs.readFileSync(test_file, 'utf8');
+            file_content.should.eql("grib data");
+            done();
+          })
+      });
     });
 
   })
